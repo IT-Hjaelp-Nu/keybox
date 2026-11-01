@@ -1,0 +1,28 @@
+[github_apps.github-app]
+client_id = "Iv23liTESTCLIENTID"
+
+[customers.acme.systems.github.actions.read-code]
+level = 1
+agents = ["hermes"]
+targets = ["org/acme-web"]
+method = { github_app = { app = "github-app", permissions = { contents = "read" } } }
+
+[customers.acme.systems.web01.actions.restart]
+level = 2
+agents = ["hermes"]
+targets = ["web01.acme.example"]
+[customers.acme.systems.web01.actions.restart.method.ssh_cert]
+ca = "ssh-ca-acme"
+principal = "ops"
+source_address = ["100.64.0.10"]
+force_command = "/usr/bin/systemctl restart nginx"
+
+[customers.acme.systems.web01.actions.wipe-backup]
+level = 3
+agents = ["hermes"]
+targets = ["web01.acme.example"]
+[customers.acme.systems.web01.actions.wipe-backup.method.ssh_cert]
+ca = "ssh-ca-acme"
+principal = "ops"
+source_address = ["100.64.0.10"]
+force_command = "/usr/local/bin/wipe-backup"

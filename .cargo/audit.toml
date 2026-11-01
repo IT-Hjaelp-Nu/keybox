@@ -1,0 +1,11 @@
+# cargo audit reads Cargo.lock, which lists every optional dependency whether
+# or not it is compiled.
+[advisories]
+ignore = [
+    # rsa (Marvin attack, no fix available). ssh-key lists it as an optional
+    # dependency for RSA keys. Key-Box does not enable that feature: it
+    # accepts Ed25519 only, and `rsa` is not in the build (`cargo tree -i rsa`
+    # prints nothing). deny.toml bans the crate, so enabling it by mistake
+    # fails `cargo deny check`.
+    "RUSTSEC-2023-0071",
+]

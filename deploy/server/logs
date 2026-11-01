@@ -1,0 +1,4 @@
+#!/bin/sh
+# Key-Box: the most recent errors in the system log. Run through sudo.
+export LC_ALL=C PATH=/usr/sbin:/usr/bin:/sbin:/bin
+exec journalctl --priority=err --lines=200 --no-pager --output=short-iso

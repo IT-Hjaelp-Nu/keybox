@@ -1,0 +1,13 @@
+[package]
+name = "keybox-core"
+version = "0.1.0"
+description = "Key-Box rules and request state machine. No dependencies, no I/O, no secrets."
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]

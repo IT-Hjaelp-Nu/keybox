@@ -1,0 +1,80 @@
+[Unit]
+Description=Key-Box
+Documentation=https://github.com/IT-Hjaelp-Nu/Key-Box
+After=network-online.target tailscaled.service
+Wants=network-online.target
+
+[Service]
+Type=exec
+User=keybox
+Group=keybox
+EnvironmentFile=/etc/keybox/keyboxd.env
+ExecStart=/usr/local/bin/keyboxd serve \
+    --dir /var/lib/keybox \
+    --policy-dir ${KEYBOX_POLICY_DIR} \
+    --listen ${KEYBOX_AGENT_LISTEN} \
+    --web-listen ${KEYBOX_WEB_LISTEN} \
+    --origin ${KEYBOX_ORIGIN} \
+    --web-cert /etc/keybox/web.crt \
+    --web-key /etc/keybox/web.key \
+    --min-passkeys ${KEYBOX_MIN_PASSKEYS} \
+    --rbw /usr/local/bin/rbw \
+    --agent-allow ${KEYBOX_AGENT_ALLOW} \
+    --web-allow ${KEYBOX_WEB_ALLOW}
+# Key-Box exits when it cannot write its log, and cannot bind before
+# Tailscale has its address. Both are worth another try, slowly.
+Restart=on-failure
+RestartSec=10
+
+# The only places Key-Box may write. rbw keeps its settings and its copy of
+# the (encrypted) vault under the state directory, and its socket in /run.
+StateDirectory=keybox
+StateDirectoryMode=0700
+RuntimeDirectory=keybox
+RuntimeDirectoryMode=0700
+Environment=HOME=/var/lib/keybox
+Environment=XDG_RUNTIME_DIR=/run/keybox
+UMask=0077
+
+# Key-Box' Vaultwarden master password. The file is root's; systemd hands the
+# service a private copy that only it can read.
+LoadCredential=vault-password:/etc/keybox/vault-password
+
+# Only the tailnet and this machine (Vaultwarden, DNS). GitHub's API is added
+# in keyboxd.service.d/github.conf, Google's push service in push.conf.
+IPAddressDeny=any
+IPAddressAllow=localhost
+IPAddressAllow=100.64.0.0/10 fd7a:115c:a1e0::/48
+# AF_UNIX is for rbw, which talks to its own agent over a local socket.
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+PrivateUsers=yes
+ProtectProc=invisible
+ProcSubset=pid
+ProtectClock=yes
+ProtectHostname=yes
+ProtectKernelLogs=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+RemoveIPC=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged @resources
+# A refused call fails instead of killing the process (rbw tries a few).
+SystemCallErrorNumber=EPERM
+
+[Install]
+WantedBy=multi-user.target

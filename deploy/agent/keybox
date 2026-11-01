@@ -1,0 +1,10 @@
+#!/bin/sh
+# Send one line to Key-Box and print the one-line answer.
+#   keybox '{"op":"status","id":"…"}'
+# Runs as the agent whose certificate lies in ~/.keybox.
+set -eu
+exec /usr/local/bin/keyboxd call \
+    --addr 100.64.0.1:8443 --name vault.example.ts.net \
+    --ca "$HOME/.keybox/agent-ca.pem" \
+    --cert "$HOME/.keybox/hermes.pem" --key "$HOME/.keybox/hermes.key" \
+    "$1"

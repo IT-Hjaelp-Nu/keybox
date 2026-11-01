@@ -1,0 +1,7 @@
+#!/bin/sh
+# Key-Box: install security updates the way the nightly job does. Run through sudo.
+export LC_ALL=C PATH=/usr/sbin:/usr/bin:/sbin:/bin DEBIAN_FRONTEND=noninteractive
+set -eu
+apt-get update -qq
+unattended-upgrade -v 2>&1 | tail -40
+[ -f /var/run/reboot-required ] && echo "Genstart er paakraevet." || echo "Ingen genstart noedvendig."

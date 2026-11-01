@@ -1,0 +1,40 @@
+# Key-Box policy. Anything not written here cannot be requested.
+# Holds the *names* of secrets in the vault, never the secrets.
+
+# A GitHub App. The name is also the name of the vault item holding its
+# private key. The client id is public.
+[github_apps.github-app-ithjaelpnu]
+client_id = "Iv23liEXAMPLE0000000"
+
+# Level 1: no approval, logged.
+[customers.bager-jensen.systems.github.actions.read-code]
+level   = 1
+agents  = ["hermes", "coder"]
+targets = ["IT-Hjaelp-Nu/bager-jensen-web"]
+method  = { github_app = { app = "github-app-ithjaelpnu", permissions = { contents = "read" } } }
+
+# Level 2: one passkey. The approval names the exact commit, and the
+# certificate can only run the deploy script with that commit.
+[customers.bager-jensen.systems.web01.actions.deploy]
+level   = 2
+agents  = ["deployer"]
+targets = ["web01.bager-jensen.example"]
+pin     = "commit"
+
+[customers.bager-jensen.systems.web01.actions.deploy.method.ssh_cert]
+ca             = "ssh-ca-bager-jensen"
+principal      = "deploy"
+source_address = ["100.64.0.10"]
+force_command  = "/usr/local/bin/deploy {commit}"
+
+[customers.bager-jensen.systems.web01.actions.restart-web]
+level   = 2
+agents  = ["hermes"]
+targets = ["web01.bager-jensen.example"]
+
+[customers.bager-jensen.systems.web01.actions.restart-web.method.ssh_cert]
+ca             = "ssh-ca-bager-jensen"
+principal      = "ops"
+source_address = ["100.64.0.10"]
+force_command  = "/usr/bin/systemctl restart nginx"
+ttl_secs       = 300

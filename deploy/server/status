@@ -1,0 +1,18 @@
+#!/bin/sh
+# Key-Box: read-only overview of this server. Runs as keybox-agent, without
+# root, and changes nothing.
+export LC_ALL=C PATH=/usr/sbin:/usr/bin:/sbin:/bin
+echo "vaert:        $(hostname)"
+echo "tid:          $(date -Is)"
+echo "oppetid:      $(uptime -p 2>/dev/null | sed 's/^up //')"
+echo "belastning:   $(cut -d' ' -f1-3 /proc/loadavg)"
+echo "hukommelse:   $(free -m | awk '/^Mem:/ {printf "%d af %d MB brugt", $3, $2}')"
+echo "disk:"
+df -h -x tmpfs -x devtmpfs -x overlay -x squashfs --output=target,pcent,avail 2>/dev/null | sed 's/^/  /'
+echo "fejlede tjenester:"
+systemctl --failed --no-legend --plain 2>/dev/null | awk '{print "  " $1}' | head -20
+[ -z "$(systemctl --failed --no-legend --plain 2>/dev/null)" ] && echo "  ingen"
+if [ -r /var/lib/update-notifier/updates-available ]; then
+    echo "opdateringer: $(grep -E '[0-9]+ ' /var/lib/update-notifier/updates-available | tr -s ' \n' ' ' | sed 's/^ //')"
+fi
+[ -f /var/run/reboot-required ] && echo "genstart:     paakraevet" || echo "genstart:     ikke paakraevet"

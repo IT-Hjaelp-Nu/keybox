@@ -1,0 +1,20 @@
+#!/bin/sh
+# Answers rbw's password prompt with Key-Box' own Vaultwarden master password.
+#
+# rbw asks for the password through the pinentry protocol. This is the
+# smallest program that speaks it: every command is acknowledged, and GETPIN
+# is answered from the credential systemd hands to the service. The password
+# is never an argument and never in the environment.
+#
+# The password must not contain '%' or line breaks (the protocol would need
+# them escaped). The generated one is letters, digits, '-' and '_'.
+set -u
+file="${CREDENTIALS_DIRECTORY:?not run by the keyboxd service}/vault-password"
+echo "OK Key-Box"
+while IFS= read -r line; do
+    case "$line" in
+        GETPIN*) printf 'D %s\nOK\n' "$(cat "$file")" ;;
+        BYE*) echo "OK"; exit 0 ;;
+        *) echo "OK" ;;
+    esac
+done

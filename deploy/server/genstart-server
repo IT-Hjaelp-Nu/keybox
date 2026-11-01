@@ -1,0 +1,8 @@
+#!/bin/sh
+# Key-Box: reboot this whole server, one minute from now. Run through sudo.
+# The delay lets the session that asked for it end cleanly and leaves a
+# minute to cancel with "shutdown -c".
+export LC_ALL=C PATH=/usr/sbin:/usr/bin:/sbin:/bin
+set -eu
+shutdown -r +1 "Key-Box: genstart af serveren, godkendt med passkey" 2>/dev/null
+echo "Serveren genstarter kl. $(date -d '+1 minute' +%H:%M). Fortryd inden da med: shutdown -c"

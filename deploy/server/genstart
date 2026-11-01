@@ -1,0 +1,15 @@
+#!/bin/sh
+# Key-Box: restart one named service. Run through sudo.
+# Only names listed in /etc/keybox-agent/tjenester can be restarted, whatever
+# the caller asks for. A name is a systemd unit, or "docker:<container>".
+export LC_ALL=C PATH=/usr/sbin:/usr/bin:/sbin:/bin
+set -eu
+name="${1:-}"
+case "$name" in
+    *[!a-zA-Z0-9@._:-]*|"") echo "ugyldigt navn" >&2; exit 2 ;;
+esac
+grep -qxF -- "$name" /etc/keybox-agent/tjenester 2>/dev/null || { echo "ikke paa listen" >&2; exit 3; }
+case "$name" in
+    docker:*) docker restart -- "${name#docker:}" >/dev/null && echo "genstartet: $name" ;;
+    *) systemctl restart -- "$name" && echo "genstartet: $name ($(systemctl is-active -- "$name"))" ;;
+esac

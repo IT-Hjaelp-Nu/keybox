@@ -1,0 +1,16 @@
+[package]
+name = "keybox-log"
+version = "0.1.0"
+description = "Key-Box audit log: append-only file with a hash chain."
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+keybox-core = { path = "../keybox-core" }
+ring = "0.17.14"
+serde_json = "1.0.152"
